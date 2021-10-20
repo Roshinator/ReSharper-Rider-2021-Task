@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "YOZihPf7DJ7jCayc8h7TWIMHrKkAv2oCFgLQ3/1Yk5osesr+R9FUZTsObsP5ORnsL9HJqONYoDeihtU1uqIb9Q==",
+  "success": true,
+  "projectFilePath": "/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/ReSharperRiderTask.csproj",
+  "expectedPackageFiles": [
+    "/Users/roshansevalia/.nuget/packages/microsoft.netcore.app.host.osx-x64/3.1.18/microsoft.netcore.app.host.osx-x64.3.1.18.nupkg.sha512"
+  ],
+  "logs": []
+}
