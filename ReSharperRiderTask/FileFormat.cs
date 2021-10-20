@@ -58,20 +58,16 @@ namespace ReSharperRiderTask
         public FileFormat(in string path)
         {
             structure = new List<(string, CellType)>();
-            //StreamReader inputFile = new StreamReader(path);
+            StreamReader inputFile = new StreamReader(path);
 
-            //string header = inputFile.ReadLine();
-            //Delimiter = FindDelimiter(header);
-            //string[] headerItems = SplitByDelimiter(header, Delimiter);
+            string header = inputFile.ReadLine();
+            Delimiter = FindDelimiter(header);
+            IEnumerable<string> headerItems = SplitByDelimiter(header, Delimiter);
 
-            //string line2 = inputFile.ReadLine();
-            //List<CellType> types = DetermineTypes(SplitByDelimiter(line2, Delimiter));
-            //for (int i = 0; i < headerItems.Length; i++)
-            //{
-            //    structure.Add((headerItems[i], types[i]));
-            //}
+            string line2 = inputFile.ReadLine();
+            structure = GetStructure(headerItems, SplitByDelimiter(line2, Delimiter));
 
-            //We have now determined the structure of the file
+            // We have now determined the structure of the file
 
 
         }
@@ -140,31 +136,34 @@ namespace ReSharperRiderTask
             return '\n'; // Only one item per row, so splits will simply return the line
         }
 
-        private List<CellType> DetermineTypes(string[] items)
+        private List<(string, CellType)> GetStructure(IEnumerable<string> headings, IEnumerable<string> items)
         {
-            List<CellType> types = new List<CellType>();
+            List<(string, CellType)> st = new List<(string, CellType)>();
+            IEnumerator<string> headingsEnumerator = headings.GetEnumerator();
             foreach (string s in items)
             {
+                headingsEnumerator.MoveNext();
+                string title = headingsEnumerator.Current;
                 string test = s.Replace("\"", "");
                 foreach (Regex rx in _dateRegex.Keys)
                 {
                     if (rx.IsMatch(test))
                     {
-                        types.Add(CellType.Date);
+                        st.Add((title, CellType.Date));
                         continue;
                     }
                 }
 
                 if (Regex.IsMatch(test, @"[^\d\., ]")) // If there is a match for a non-number
                 {
-                    types.Add(CellType.String);
+                    st.Add((title, CellType.String));
                 }
                 else
                 {
-                    types.Add(CellType.Number);
+                    st.Add((title, CellType.Number));
                 }
             }
-            return types;
+            return st;
         }
 
     }
