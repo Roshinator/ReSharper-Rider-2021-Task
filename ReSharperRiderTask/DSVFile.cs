@@ -3,15 +3,15 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Text;
+using System.Collections;
 
 namespace ReSharperRiderTask
 {
-    public class FileFormat
+    public class DSVFile
     {
-        //private readonly char[] _delimiters = { ',', '\t', ';' };
-        //private readonly char[] _decimals = { '.', ',' };
-        //private readonly char[] _thousands = { '.', ',', ' ' };
-        //private readonly char[] _dateSeparator = { '/', '.' };
+        private static readonly char[] _delimiters = { ',', '\t', ';' };
+        private static readonly char[] _decimals = { '.', ',' };
+        private static readonly char[] _thousands = { '.', ',', ' ' };
         public enum DateOrder { Slash_DDMMYYYY, Slash_MMDDYYYY, Slash_YYYYMMDD, Dot_DDMMYYYY, Dot_MMDDYYYY, Dot_YYYYMMDD };
         private Dictionary<Regex, DateOrder> _dateRegex = new Dictionary<Regex, DateOrder>()
         {
@@ -46,6 +46,37 @@ namespace ReSharperRiderTask
                 DateOrder.Dot_YYYYMMDD
             },
         };
+        private SortedDictionary<Regex, char> _decRegex = new SortedDictionary<Regex, char>()
+        {
+            {
+                new Regex(@"\d{1,3}\.\d*$",
+                    RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                _decimals[0] //"."
+            },
+            {
+                new Regex(@"\d{1,3},\d*$",
+                    RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                _decimals[1] //","
+            }
+        };
+        private SortedDictionary<Regex, char> _thousandsRegex = new SortedDictionary<Regex, char>()
+        {
+            {
+                new Regex(@"^\d{1,3}(\.\d{3})*",
+                    RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                _thousands[0] //"."
+            },
+            {
+                new Regex(@"^\d{1,3}(,\d{3})*",
+                    RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                _thousands[1] //","
+            },
+            {
+                new Regex(@"^\d{1,3}( \d{3})*",
+                    RegexOptions.Compiled | RegexOptions.IgnoreCase),
+                _thousands[2] //" "
+            },
+        };
         private enum CellType { String, Number, Date };
 
         public char Delimiter;
@@ -55,7 +86,7 @@ namespace ReSharperRiderTask
 
         public DateOrder DateFormat {get; private set;}
 
-        public FileFormat(in string path)
+        public DSVFile(in string path)
         {
             structure = new List<(string, CellType)>();
             StreamReader inputFile = new StreamReader(path);
@@ -69,7 +100,42 @@ namespace ReSharperRiderTask
 
             // We have now determined the structure of the file
 
+            HashSet<char> possibleDecimals = new HashSet<char>(_decimals);
+            HashSet<char> possibleThousands = new HashSet<char>(_thousands);
+            HashSet<DateOrder> possibleDateOrders = new HashSet<DateOrder>(_dateRegex.Values);
+            for (string line = line2; line != null; line = inputFile.ReadLine())
+            {
+                int column = 0;
+                foreach (string item in SplitByDelimiter(line, Delimiter))
+                {
+                    CellType cType = structure[column].Item2;
 
+                    if (cType == CellType.Number && (ThousandsSeparator == default || DecimalSeparator == default))
+                    {
+                        HashSet<char> itemPossibleDecimals = GetPossibleDecimalTypes(item);
+                        HashSet<char> itemPossibleThousands = DetermineThousandsType(item);
+                        //Process decimals here
+
+                    }
+                    else if (cType == CellType.Date)
+                    {
+                        HashSet<DateOrder> itemPossibleDateOrders = DetermineDateType(item);
+                        possibleDateOrders.RemoveWhere((dateOrder) =>
+                        {
+                            return !itemPossibleDateOrders.Contains(dateOrder);
+                        });
+                        if (possibleDateOrders.Count == 1)
+                        {
+                            IEnumerator<DateOrder> e = possibleDateOrders.GetEnumerator();
+                            e.MoveNext();
+                            DateFormat = e.Current;
+                        }
+                    }
+
+                    column++;
+                }
+            }
+            
         }
 
         public static IEnumerable<string> SplitByDelimiter(string str, char delimiter)
@@ -166,6 +232,44 @@ namespace ReSharperRiderTask
             return st;
         }
 
+        private HashSet<char> GetPossibleDecimalTypes(string num)
+        {
+            HashSet<char> possibleDecimals = new HashSet<char>(_decimals);
+            foreach (Regex key in _decRegex.Keys)
+            {
+                if (!key.IsMatch(num))
+                {
+                    possibleDecimals.Remove(_decRegex[key]);
+                }
+            }
+            return possibleDecimals;
+        }
+
+        private HashSet<char> DetermineThousandsType(string num)
+        {
+            HashSet<char> possibleThousands = new HashSet<char>(_thousands);
+            foreach (Regex key in _thousandsRegex.Keys)
+            {
+                if (!key.IsMatch(num))
+                {
+                    possibleThousands.Remove(_thousandsRegex[key]);
+                }
+            }
+            return possibleThousands;
+        }
+
+        private HashSet<DateOrder> DetermineDateType(string date)
+        {
+            HashSet<DateOrder> possibleDateOrders = new HashSet<DateOrder>(_dateRegex.Values);
+            foreach (Regex key in _dateRegex.Keys)
+            {
+                if (!key.IsMatch(date))
+                {
+                    possibleDateOrders.Remove(_dateRegex[key]);
+                }
+            }
+            return possibleDateOrders;
+        }
+
     }
 }
-

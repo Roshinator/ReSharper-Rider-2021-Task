@@ -1,17 +1,42 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 namespace ReSharperRiderTask
 {
     class Program
     {
         static void Main(string[] args)
         {
-            // string str = "\"thing, 2\",thing,\"this\",that,\"wow\"\n";
-            string str = "thing,,thing,\n";
-            foreach (string s in FileFormat.SplitByDelimiter(str, ','))
+            SpawnThreads();
+        }
+
+        static async Task SpawnThreads()
+        {
+            List<Task<int>> tasks = new List<Task<int>>();
+            for (int i = 0; i < 1000000; i++)
             {
-                Console.WriteLine("<" + s + ">");
+                int x = i;
+                tasks.Add(Task.Factory.StartNew<int>(() =>
+                {
+                    Thread.Sleep(500000);
+                    return x;
+                }));
             }
+
+            List<int> outputs = new List<int>();
+            int c = 0;
+            int[] results = await Task.WhenAll(tasks);
+            foreach (int res in results)
+            {
+                Console.Write("{0}, ", res);
+            }
+            
+        }
+
+        DSVFile GetData(string path)
+        {
+            return new DSVFile(path);
         }
     }
 }

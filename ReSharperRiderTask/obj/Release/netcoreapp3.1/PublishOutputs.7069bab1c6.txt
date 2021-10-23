@@ -1,0 +1,5 @@
+/Users/roshansevalia/Desktop/ReSharperRiderTask
+/Users/roshansevalia/Desktop/ReSharperRiderTask.dll
+/Users/roshansevalia/Desktop/ReSharperRiderTask.deps.json
+/Users/roshansevalia/Desktop/ReSharperRiderTask.runtimeconfig.json
+/Users/roshansevalia/Desktop/ReSharperRiderTask.pdb

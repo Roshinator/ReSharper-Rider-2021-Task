@@ -1,17 +1,14 @@
 ﻿<Properties StartupConfiguration="{CAEA6643-3A5E-4BA0-8860-2B0391871FBA}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="ReSharperRiderTask/FileFormat.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="ReSharperRiderTask/Program.cs">
     <Files>
-      <File FileName="ReSharperRiderTask/Program.cs" Line="9" Column="13" />
-      <File FileName="ReSharperRiderTask/FileStructure.cs" Line="25" Column="12" />
-      <File FileName="ReSharperRiderTask/FileFormat.cs" Line="14" Column="2" />
+      <File FileName="ReSharperRiderTask/Program.cs" Line="28" Column="49" />
+      <File FileName="ReSharperRiderTask/FileStructure.cs" Line="14" Column="55" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="ReSharperRiderTask" expanded="True">
-            <Node name="ReSharperRiderTask" expanded="True">
-              <Node name="FileFormat.cs" selected="True" />
-            </Node>
+            <Node name="ReSharperRiderTask" expanded="True" />
           </Node>
         </State>
       </Pad>

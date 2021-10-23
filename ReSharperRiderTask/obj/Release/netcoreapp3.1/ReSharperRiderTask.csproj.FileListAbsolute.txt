@@ -1,0 +1,14 @@
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/ReSharperRiderTask
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/ReSharperRiderTask.deps.json
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/ReSharperRiderTask.runtimeconfig.json
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/ReSharperRiderTask.runtimeconfig.dev.json
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/ReSharperRiderTask.dll
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/ReSharperRiderTask.pdb
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/obj/Release/netcoreapp3.1/ReSharperRiderTask.csproj.AssemblyReference.cache
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/obj/Release/netcoreapp3.1/ReSharperRiderTask.GeneratedMSBuildEditorConfig.editorconfig
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/obj/Release/netcoreapp3.1/ReSharperRiderTask.AssemblyInfoInputs.cache
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/obj/Release/netcoreapp3.1/ReSharperRiderTask.AssemblyInfo.cs
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/obj/Release/netcoreapp3.1/ReSharperRiderTask.csproj.CoreCompileInputs.cache
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/obj/Release/netcoreapp3.1/ReSharperRiderTask.dll
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/obj/Release/netcoreapp3.1/ReSharperRiderTask.pdb
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/obj/Release/netcoreapp3.1/ReSharperRiderTask.genruntimeconfig.cache
