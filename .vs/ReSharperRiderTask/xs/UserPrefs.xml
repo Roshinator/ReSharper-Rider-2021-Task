@@ -1,8 +1,8 @@
 ﻿<Properties StartupConfiguration="{CAEA6643-3A5E-4BA0-8860-2B0391871FBA}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="ReSharperRiderTask/Program.cs">
     <Files>
-      <File FileName="ReSharperRiderTask/Program.cs" Line="28" Column="49" />
-      <File FileName="ReSharperRiderTask/FileStructure.cs" Line="14" Column="55" />
+      <File FileName="ReSharperRiderTask/Program.cs" Line="11" Column="28" />
+      <File FileName="ReSharperRiderTask/DSVFile.cs" Line="118" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
