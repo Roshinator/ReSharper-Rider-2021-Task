@@ -9,77 +9,38 @@ namespace ReSharperRiderTask
 {
     public class DSVFile
     {
-        private static readonly char[] _delimiters = { ',', '\t', ';' };
-        private static readonly char[] _decimals = { '.', ',' };
-        private static readonly char[] _thousands = { '.', ',', ' ' };
-        
-        private static Dictionary<Regex, char> s_DecRegex = new Dictionary<Regex, char>()
-        {
-            {
-                new Regex(@"\d{1,3}\.\d*$",
-                    RegexOptions.Compiled | RegexOptions.IgnoreCase),
-                _decimals[0] //"."
-            },
-            {
-                new Regex(@"\d{1,3},\d*$",
-                    RegexOptions.Compiled | RegexOptions.IgnoreCase),
-                _decimals[1] //","
-            }
-        };
-        private static Dictionary<Regex, char> s_ThousandsRegex = new Dictionary<Regex, char>()
-        {
-            {
-                new Regex(@"^\d{1,3}(\.\d{3})+",
-                    RegexOptions.Compiled | RegexOptions.IgnoreCase),
-                _thousands[0] //"."
-            },
-            {
-                new Regex(@"^\d{1,3}(,\d{3})+",
-                    RegexOptions.Compiled | RegexOptions.IgnoreCase),
-                _thousands[1] //","
-            },
-            {
-                new Regex(@"^\d{1,3}( \d{3})+",
-                    RegexOptions.Compiled | RegexOptions.IgnoreCase),
-                _thousands[2] //" "
-            },
-        };
+        public DSVStructure Structure { get; private set; }
 
-        public DSVStructure structure { get; private set; }
-
-        public char Delimiter;
-        public char DecimalSeparator;
-        public char ThousandsSeparator;
-
-        public DSVDateFormat.DateOrder DateFormat { get; private set; } = DSVDateFormat.DateOrder.None;
+        public DSVFormat Format { get; private set; }
 
         public DSVFile(in string path)
         {
+            Format = new DSVFormat();
             StreamReader inputFile = new StreamReader(path);
 
             string header = inputFile.ReadLine();
-            Delimiter = FindDelimiter(header);
+            Format.Delimiter = FindDelimiter(header);
 
-            IEnumerable<string> headerItems = SplitByDelimiter(header, Delimiter);
+            IEnumerable<string> headerItems = SplitByDelimiter(header, Format.Delimiter);
 
             string line2 = inputFile.ReadLine();
-            structure = new DSVStructure(headerItems, SplitByDelimiter(line2, Delimiter));
+            Structure = new DSVStructure(headerItems, SplitByDelimiter(line2, Format.Delimiter));
 
             // We have now determined the structure of the file
 
-            HashSet<char> possibleDecimals = new HashSet<char>(_decimals);
-            HashSet<char> possibleThousands = new HashSet<char>(_thousands);
+            HashSet<char> possibleDecimals = new HashSet<char>(DSVFormat.s_Decimals);
+            HashSet<char> possibleThousands = new HashSet<char>(DSVFormat.s_Thousands);
             HashSet<DSVDateFormat.DateOrder> possibleDateOrders = new HashSet<DSVDateFormat.DateOrder>(DSVDateFormat.s_DateRegex.Values);
             for (string line = line2;
-                line != null && (DecimalSeparator == default || ThousandsSeparator == default || DateFormat == DSVDateFormat.DateOrder.None);
+                line != null && (Format.DecimalSeparator == default || Format.ThousandsSeparator == default || Format.DateFormat == DSVDateFormat.DateOrder.None);
                 line = inputFile.ReadLine())
             {
                 int column = 0;
-                foreach (string item in SplitByDelimiter(line, Delimiter))
+                foreach (string item in SplitByDelimiter(line, Format.Delimiter))
                 {
-                    DSVStructure.CellType cType = structure.GetTypeAtColumn(column);
+                    DSVStructure.CellType cType = Structure.GetTypeAtColumn(column);
 
-                    if (cType == DSVStructure.CellType.Number && (ThousandsSeparator == default || DecimalSeparator == default))
+                    if (cType == DSVStructure.CellType.Number && (Format.ThousandsSeparator == default || Format.DecimalSeparator == default))
                     {
                         HashSet<char> itemPossibleDecimals = GetPossibleDecimalTypes(item);
                         HashSet<char> itemPossibleThousands = DetermineThousandsType(item);
@@ -94,11 +55,11 @@ namespace ReSharperRiderTask
                         });
                         if (possibleDecimals.Count == 1)
                         {
-                            DecimalSeparator = GetFirst<char>(possibleDecimals);
+                            Format.DecimalSeparator = GetFirst<char>(possibleDecimals);
                         }
                         if (possibleThousands.Count == 1)
                         {
-                            ThousandsSeparator = GetFirst<char>(possibleThousands);
+                            Format.ThousandsSeparator = GetFirst<char>(possibleThousands);
                         }
                     }
                     else if (cType == DSVStructure.CellType.Date)
@@ -112,24 +73,24 @@ namespace ReSharperRiderTask
                         {
                             IEnumerator<DSVDateFormat.DateOrder> e = possibleDateOrders.GetEnumerator();
                             e.MoveNext();
-                            DateFormat = e.Current;
+                            Format.DateFormat = e.Current;
                         }
                     }
 
                     column++;
                 }
             }
-            if (DecimalSeparator == default)
+            if (Format.DecimalSeparator == default)
             {
-                DecimalSeparator = GetFirst<char>(possibleDecimals);
+                Format.DecimalSeparator = GetFirst<char>(possibleDecimals);
             }
-            if (ThousandsSeparator == default)
+            if (Format.ThousandsSeparator == default)
             {
-                ThousandsSeparator = GetFirst<char>(possibleThousands);
+                Format.ThousandsSeparator = GetFirst<char>(possibleThousands);
             }
-            if (DateFormat == DSVDateFormat.DateOrder.None)
+            if (Format.DateFormat == DSVDateFormat.DateOrder.None)
             {
-                DateFormat = DSVDateFormat.DateOrder.Slash_DDMMYYYY;
+                Format.DateFormat = DSVDateFormat.DateOrder.Slash_DDMMYYYY;
             }
         }
 
@@ -182,45 +143,45 @@ namespace ReSharperRiderTask
                 {
                     withinQuote = !withinQuote;
                 }
-                else if (Array.IndexOf(_delimiters, c) != -1)
+                else if (Array.IndexOf(DSVFormat.s_Delimiters, c) != -1)
                 {
                     if (!withinQuote)
                         return c;
                 }
             }
-            return _delimiters[0]; // Only one item per row, so use a default
+            return DSVFormat.s_Delimiters[0]; // Only one item per row, so use a default
         }
 
         private HashSet<char> GetPossibleDecimalTypes(string num)
         {
-            HashSet<char> possibleDecimals = new HashSet<char>(_decimals);
-            foreach (Regex key in s_DecRegex.Keys)
+            HashSet<char> possibleDecimals = new HashSet<char>(DSVFormat.s_Decimals);
+            foreach (Regex key in DSVFormat.s_DecRegex.Keys)
             {
                 if (!key.IsMatch(num))
                 {
-                    possibleDecimals.Remove(s_DecRegex[key]);
+                    possibleDecimals.Remove(DSVFormat.s_DecRegex[key]);
                 }
             }
             if (possibleDecimals.Count == 0)
             {
-                return new HashSet<char>(_decimals);
+                return new HashSet<char>(DSVFormat.s_Decimals);
             }
             return possibleDecimals;
         }
 
         private HashSet<char> DetermineThousandsType(string num)
         {
-            HashSet<char> possibleThousands = new HashSet<char>(_thousands);
-            foreach (Regex key in s_ThousandsRegex.Keys)
+            HashSet<char> possibleThousands = new HashSet<char>(DSVFormat.s_Thousands);
+            foreach (Regex key in DSVFormat.s_ThousandsRegex.Keys)
             {
                 if (!key.IsMatch(num))
                 {
-                    possibleThousands.Remove(s_ThousandsRegex[key]);
+                    possibleThousands.Remove(DSVFormat.s_ThousandsRegex[key]);
                 }
             }
             if (possibleThousands.Count == 0)
             {
-                return new HashSet<char>(_thousands);
+                return new HashSet<char>(DSVFormat.s_Thousands);
             }
             return possibleThousands;
         }

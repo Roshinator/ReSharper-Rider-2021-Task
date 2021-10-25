@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ReSharperRiderTask
@@ -49,6 +50,24 @@ namespace ReSharperRiderTask
         public bool Equals([AllowNull] DSVStructure other)
         {
             return other._structure.Equals(_structure);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(_structure);
+        }
+
+        public override string ToString()
+        {
+            StringBuilder str = new StringBuilder();
+            str.Append('[');
+            foreach ((string, CellType) val in _structure)
+            {
+                str.AppendFormat("(\"{0}\", {1}) ; ", val.Item1, val.Item2.ToString());
+            }
+            str.Remove(str.Length - 3, 3);
+            str.Append(']');
+            return str.ToString();
         }
     }
 }

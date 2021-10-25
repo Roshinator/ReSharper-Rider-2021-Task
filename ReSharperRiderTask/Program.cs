@@ -18,9 +18,31 @@ namespace ReSharperRiderTask
             }
 
             DSVFile[] results = await Task.WhenAll(tasks);
+            Dictionary<DSVStructure, int> structures = new Dictionary<DSVStructure, int>();
+            Dictionary<DSVFormat, int> formats = new Dictionary<DSVFormat, int>();
             foreach (DSVFile res in results)
             {
-                Console.Write("{0}, ", res);
+                if (structures.ContainsKey(res.Structure))
+                    structures[res.Structure]++;
+                else
+                    structures.Add(res.Structure, 1);
+
+                if (formats.ContainsKey(res.Format))
+                    formats[res.Format]++;
+                else
+                    formats.Add(res.Format, 1);
+            }
+
+            Console.WriteLine("STRUCTURE STATS:");
+            foreach (DSVStructure strct in structures.Keys)
+            {
+                Console.WriteLine("Count: {0} => {1}", structures[strct], strct.ToString());
+            }
+
+            Console.WriteLine("FORMATS:");
+            foreach (DSVFormat fmt in formats.Keys)
+            {
+                Console.WriteLine("Count: {0} => {1}", formats[fmt], fmt.ToString());
             }
         }
 
