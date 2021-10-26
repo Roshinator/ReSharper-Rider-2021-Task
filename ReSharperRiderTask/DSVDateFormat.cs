@@ -4,6 +4,9 @@ using System.Text.RegularExpressions;
 
 namespace ReSharperRiderTask
 {
+    /// <summary>
+    /// This class provides the Date formats
+    /// </summary>
     public class DSVDateFormat
     {
         public enum DateOrder { None, Slash_DDMMYYYY, Slash_MMDDYYYY, Slash_YYYYMMDD, Dot_DDMMYYYY, Dot_MMDDYYYY, Dot_YYYYMMDD };
@@ -40,6 +43,11 @@ namespace ReSharperRiderTask
                 DateOrder.Dot_YYYYMMDD
             },
         };
+
+        /// <summary>
+        /// Constructor override since this class should not be constructed.
+        /// </summary>
+        private DSVDateFormat() { }
     }
 }
 

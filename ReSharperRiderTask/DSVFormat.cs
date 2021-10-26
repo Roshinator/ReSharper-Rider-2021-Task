@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace ReSharperRiderTask
 {
+    /// <summary>
+    /// This class represents a DSV file's format as per the problem statement.
+    /// </summary>
     public class DSVFormat : IEquatable<DSVFormat>
     {
         public static readonly char[] s_Decimals = { '.', ',' };

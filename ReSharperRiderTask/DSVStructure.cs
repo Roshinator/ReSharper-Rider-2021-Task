@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace ReSharperRiderTask
 {
+    /// <summary>
+    /// Holds the data for a DSV file structure
+    /// </summary>
     public class DSVStructure : IEquatable<DSVStructure>
     {
         public enum CellType { String, Number, Date };
@@ -42,6 +45,11 @@ namespace ReSharperRiderTask
             }
         }
 
+        /// <summary>
+        /// Gets the type of data at a column index
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns></returns>
         public CellType GetTypeAtColumn(int column)
         {
             return _structure[column].Item2;

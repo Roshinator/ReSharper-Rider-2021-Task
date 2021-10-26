@@ -7,9 +7,31 @@ namespace ReSharperRiderTask
 {
     class Program
     {
+        /// <summary>
+        /// Main function
+        /// </summary>
+        /// <param name="args">Command line args</param>
         static async Task Main(string[] args)
         {
-            List<string> files = GetFilesInDirectoryRecursive("/Users/roshansevalia/Desktop/ReSharperRiderTestCases", "*.txt");
+            Console.Write("Enter the directory:");
+            string directory = Console.ReadLine();
+            while (!Directory.Exists(directory))
+            {
+                Console.WriteLine("Invalid Directory.");
+                Console.Write("Enter the directory:");
+                directory = Console.ReadLine();
+            }
+            Console.WriteLine("Enter masks: [q to continue]");
+            List<string> masks = new List<string>();
+            for (string maskInput = Console.ReadLine(); maskInput != "q"; maskInput = Console.ReadLine())
+            {
+                masks.Add(maskInput);
+            }
+            if (masks.Count == 0)
+            {
+                masks.Add("*");
+            }
+            HashSet<string> files = GetFilesInDirectoryRecursive(directory, masks);
             List<Task<DSVFile>> tasks = new List<Task<DSVFile>>(); // Use tasks to take advantage of thread pooling
             foreach (string file in files)
             {
@@ -46,18 +68,30 @@ namespace ReSharperRiderTask
             }
         }
 
-        static List<string> GetFilesInDirectoryRecursive(string path, string mask)
+        /// <summary>
+        /// Gets files in the directory and subdirectories using a mask
+        /// </summary>
+        /// <param name="path">Path to files to files</param>
+        /// <param name="masks">A list of * and ? parameter filter masks</param>
+        /// <returns>A set of file paths to the matching files</returns>
+        static HashSet<string> GetFilesInDirectoryRecursive(string path, IEnumerable<string> masks)
         {
             try
             {
-                List<string> files = new List<string>();
-                foreach (string file in Directory.GetFiles(path, mask))
+                HashSet<string> files = new HashSet<string>();
+                foreach (string mask in masks)
                 {
-                    files.Add(file);
+                    foreach (string file in Directory.GetFiles(path, mask))
+                    {
+                        if (!files.Contains(file))
+                        {
+                            files.Add(file);
+                        }
+                    }
                 }
                 foreach (string directory in Directory.GetDirectories(path))
                 {
-                    files.AddRange(GetFilesInDirectoryRecursive(directory, mask));
+                    files.UnionWith(GetFilesInDirectoryRecursive(directory, masks));
                 }
                 return files;
             }
@@ -68,6 +102,11 @@ namespace ReSharperRiderTask
             }
         }
 
+        /// <summary>
+        /// Returns the file data using a path
+        /// </summary>
+        /// <param name="path">Path to the file</param>
+        /// <returns>The data for the DSV file</returns>
         static DSVFile GetData(string path)
         {
             return new DSVFile(path);

@@ -7,6 +7,9 @@ using System.Collections;
 
 namespace ReSharperRiderTask
 {
+    /// <summary>
+    /// This class parses the format and structure of the file
+    /// </summary>
     public class DSVFile
     {
         public DSVStructure Structure { get; private set; }
@@ -45,14 +48,8 @@ namespace ReSharperRiderTask
                         HashSet<char> itemPossibleDecimals = GetPossibleDecimalTypes(item);
                         HashSet<char> itemPossibleThousands = DetermineThousandsType(item);
                         //Process decimals here
-                        possibleDecimals.RemoveWhere((c) =>
-                        {
-                            return !itemPossibleDecimals.Contains(c);
-                        });
-                        possibleThousands.RemoveWhere((c) =>
-                        {
-                            return !itemPossibleThousands.Contains(c);
-                        });
+                        possibleDecimals.IntersectWith(itemPossibleDecimals);
+                        possibleThousands.IntersectWith(itemPossibleThousands);
                         if (possibleDecimals.Count == 1)
                         {
                             Format.DecimalSeparator = GetFirst<char>(possibleDecimals);
@@ -65,15 +62,10 @@ namespace ReSharperRiderTask
                     else if (cType == DSVStructure.CellType.Date)
                     {
                         HashSet<DSVDateFormat.DateOrder> itemPossibleDateOrders = DetermineDateType(item);
-                        possibleDateOrders.RemoveWhere((dateOrder) =>
-                        {
-                            return !itemPossibleDateOrders.Contains(dateOrder);
-                        });
+                        possibleDateOrders.IntersectWith(itemPossibleDateOrders);
                         if (possibleDateOrders.Count == 1)
                         {
-                            IEnumerator<DSVDateFormat.DateOrder> e = possibleDateOrders.GetEnumerator();
-                            e.MoveNext();
-                            Format.DateFormat = e.Current;
+                            Format.DateFormat = GetFirst<DSVDateFormat.DateOrder>(possibleDateOrders);
                         }
                     }
 
@@ -94,6 +86,12 @@ namespace ReSharperRiderTask
             }
         }
 
+        /// <summary>
+        /// Splits a string by delimiter and accounts for quotes in cells
+        /// </summary>
+        /// <param name="str">String to parse</param>
+        /// <param name="delimiter">Delimiter character</param>
+        /// <returns>Returns a collection of strings that have been separated by the delimiter with quotes removed</returns>
         public static IEnumerable<string> SplitByDelimiter(string str, char delimiter)
         {
             bool inQuote = false;
@@ -134,6 +132,11 @@ namespace ReSharperRiderTask
             yield break;
         }
 
+        /// <summary>
+        /// Finds the delimiter in a string
+        /// </summary>
+        /// <param name="s">String to parse the delimiter from</param>
+        /// <returns>The delimiter character</returns>
         private char FindDelimiter(in string s)
         {
             bool withinQuote = false;
@@ -152,6 +155,11 @@ namespace ReSharperRiderTask
             return DSVFormat.s_Delimiters[0]; // Only one item per row, so use a default
         }
 
+        /// <summary>
+        /// Gets the possible decimal point types for a number string
+        /// </summary>
+        /// <param name="num">The number input</param>
+        /// <returns>A set of possible decimal types (all if none could be eliminated)</returns>
         private HashSet<char> GetPossibleDecimalTypes(string num)
         {
             HashSet<char> possibleDecimals = new HashSet<char>(DSVFormat.s_Decimals);
@@ -169,6 +177,11 @@ namespace ReSharperRiderTask
             return possibleDecimals;
         }
 
+        /// <summary>
+        /// Gets the possible thousand point types for a number string
+        /// </summary>
+        /// <param name="num">The number input</param>
+        /// <returns>A set of possible thousand types (all if none could be eliminated)</returns>
         private HashSet<char> DetermineThousandsType(string num)
         {
             HashSet<char> possibleThousands = new HashSet<char>(DSVFormat.s_Thousands);
@@ -186,6 +199,11 @@ namespace ReSharperRiderTask
             return possibleThousands;
         }
 
+        /// <summary>
+        /// Gets the possible date format types for a number string
+        /// </summary>
+        /// <param name="num">The number input</param>
+        /// <returns>A set of possible decimal types (all if none could be eliminated)</returns>
         private HashSet<DSVDateFormat.DateOrder> DetermineDateType(string date)
         {
             HashSet<DSVDateFormat.DateOrder> possibleDateOrders = new HashSet<DSVDateFormat.DateOrder>(DSVDateFormat.s_DateRegex.Values);
@@ -196,10 +214,20 @@ namespace ReSharperRiderTask
                     possibleDateOrders.Remove(DSVDateFormat.s_DateRegex[key]);
                 }
             }
+            if (possibleDateOrders.Count == 0)
+            {
+                return new HashSet<DSVDateFormat.DateOrder>(DSVDateFormat.s_DateRegex.Values);
+            }
             return possibleDateOrders;
         }
 
-        private T GetFirst<T>(IEnumerable<T> collection)
+        /// <summary>
+        /// Gets the first element in a set according to its enumerator. Used to get the only item from a count = 1 unordered set.
+        /// </summary>
+        /// <typeparam name="T">Type in the collection</typeparam>
+        /// <param name="collection">The collection to get the first item from</param>
+        /// <returns>The first item in the collection according to its iterator</returns>
+        private T GetFirst<T>(ISet<T> collection)
         {
             IEnumerator<T> enumerator = collection.GetEnumerator();
             enumerator.MoveNext();
