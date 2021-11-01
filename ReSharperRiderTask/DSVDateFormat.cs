@@ -4,13 +4,18 @@ using System.Text.RegularExpressions;
 
 namespace ReSharperRiderTask
 {
-    /// <summary>
-    /// This class provides the Date formats
-    /// </summary>
-    public class DSVDateFormat
+    // Using a partial class since some of these types have critical initialization
+    // implemented in the main DSVFile class due to efficiency from analyzing
+    // format and structure at the same time.
+    public partial class DSVFile
     {
-        public enum DateOrder { None, Slash_DDMMYYYY, Slash_MMDDYYYY, Slash_YYYYMMDD, Dot_DDMMYYYY, Dot_MMDDYYYY, Dot_YYYYMMDD };
-        public static readonly Dictionary<Regex, DateOrder> s_DateRegex = new Dictionary<Regex, DateOrder>()
+        /// <summary>
+        /// This class provides the Date formats
+        /// </summary>
+        public class DSVDateFormat
+        {
+            public enum DateOrder { None, Slash_DDMMYYYY, Slash_MMDDYYYY, Slash_YYYYMMDD, Dot_DDMMYYYY, Dot_MMDDYYYY, Dot_YYYYMMDD };
+            public static readonly Dictionary<Regex, DateOrder> s_DateRegex = new Dictionary<Regex, DateOrder>()
         {
             {
                 new Regex(@"^((([012]\d)|(3[01]))\/((0\d)|(1[012]))\/(\d{4}))",
@@ -44,10 +49,11 @@ namespace ReSharperRiderTask
             },
         };
 
-        /// <summary>
-        /// Constructor override since this class should not be constructed.
-        /// </summary>
-        private DSVDateFormat() { }
+            /// <summary>
+            /// Constructor override since this class should not be constructed.
+            /// </summary>
+            private DSVDateFormat() { }
+        }
     }
 }
 

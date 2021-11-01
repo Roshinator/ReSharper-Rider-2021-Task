@@ -10,7 +10,7 @@ namespace ReSharperRiderTask
     /// <summary>
     /// This class parses the format and structure of the file
     /// </summary>
-    public class DSVFile
+    public partial class DSVFile
     {
         public DSVStructure Structure { get; private set; }
 
@@ -30,19 +30,22 @@ namespace ReSharperRiderTask
             Structure = new DSVStructure(headerItems, SplitByDelimiter(line2, Format.Delimiter));
 
             // We have now determined the structure of the file
-
+            // Analyze each line using the process of elimination on each data type
             HashSet<char> possibleDecimals = new HashSet<char>(DSVFormat.s_Decimals);
             HashSet<char> possibleThousands = new HashSet<char>(DSVFormat.s_Thousands);
             HashSet<DSVDateFormat.DateOrder> possibleDateOrders = new HashSet<DSVDateFormat.DateOrder>(DSVDateFormat.s_DateRegex.Values);
+            // Run line by line until EOF or all data types are known
             for (string line = line2;
                 line != null && (Format.DecimalSeparator == default || Format.ThousandsSeparator == default || Format.DateFormat == DSVDateFormat.DateOrder.None);
                 line = inputFile.ReadLine())
             {
+                // Run through each section separated by delimiter
                 int column = 0;
                 foreach (string item in SplitByDelimiter(line, Format.Delimiter))
                 {
                     DSVStructure.CellType cType = Structure.GetTypeAtColumn(column);
 
+                    // If we are analyzing a number, run the process of elimination on it
                     if (cType == DSVStructure.CellType.Number && (Format.ThousandsSeparator == default || Format.DecimalSeparator == default))
                     {
                         HashSet<char> itemPossibleDecimals = GetPossibleDecimalTypes(item);
@@ -59,6 +62,7 @@ namespace ReSharperRiderTask
                             Format.ThousandsSeparator = GetFirst<char>(possibleThousands);
                         }
                     }
+                    // If we are analyzing a date, run process of elimination
                     else if (cType == DSVStructure.CellType.Date)
                     {
                         HashSet<DSVDateFormat.DateOrder> itemPossibleDateOrders = DetermineDateType(item);
@@ -72,6 +76,8 @@ namespace ReSharperRiderTask
                     column++;
                 }
             }
+
+            // If we failed to perfectly eliminate everything, set defaults
             if (Format.DecimalSeparator == default)
             {
                 Format.DecimalSeparator = GetFirst<char>(possibleDecimals);
@@ -82,7 +88,7 @@ namespace ReSharperRiderTask
             }
             if (Format.DateFormat == DSVDateFormat.DateOrder.None)
             {
-                Format.DateFormat = DSVDateFormat.DateOrder.Slash_DDMMYYYY;
+                Format.DateFormat = GetFirst<DSVDateFormat.DateOrder>(possibleDateOrders);
             }
         }
 
@@ -139,7 +145,7 @@ namespace ReSharperRiderTask
         /// <returns>The delimiter character</returns>
         private char FindDelimiter(in string s)
         {
-            bool withinQuote = false;
+            bool withinQuote = false; // Used to ignore delimiters within quotes
             foreach (char c in s)
             {
                 if (c == '\"')
@@ -170,7 +176,7 @@ namespace ReSharperRiderTask
                     possibleDecimals.Remove(DSVFormat.s_DecRegex[key]);
                 }
             }
-            if (possibleDecimals.Count == 0)
+            if (possibleDecimals.Count == 0) // If all failed, all options are possibilities
             {
                 return new HashSet<char>(DSVFormat.s_Decimals);
             }
@@ -192,7 +198,7 @@ namespace ReSharperRiderTask
                     possibleThousands.Remove(DSVFormat.s_ThousandsRegex[key]);
                 }
             }
-            if (possibleThousands.Count == 0)
+            if (possibleThousands.Count == 0) // If all failed, all options are possibilities
             {
                 return new HashSet<char>(DSVFormat.s_Thousands);
             }
@@ -214,7 +220,7 @@ namespace ReSharperRiderTask
                     possibleDateOrders.Remove(DSVDateFormat.s_DateRegex[key]);
                 }
             }
-            if (possibleDateOrders.Count == 0)
+            if (possibleDateOrders.Count == 0) // If all failed, all options are possibilities
             {
                 return new HashSet<DSVDateFormat.DateOrder>(DSVDateFormat.s_DateRegex.Values);
             }

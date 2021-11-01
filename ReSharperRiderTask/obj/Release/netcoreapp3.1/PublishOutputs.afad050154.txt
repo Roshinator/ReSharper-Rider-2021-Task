@@ -1,0 +1,5 @@
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/publish/ReSharperRiderTask
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/publish/ReSharperRiderTask.dll
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/publish/ReSharperRiderTask.deps.json
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/publish/ReSharperRiderTask.runtimeconfig.json
+/Users/roshansevalia/Documents/VisualStudio/ReSharperRiderTask/ReSharperRiderTask/bin/Release/netcoreapp3.1/publish/ReSharperRiderTask.pdb

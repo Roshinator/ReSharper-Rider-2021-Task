@@ -13,12 +13,13 @@ namespace ReSharperRiderTask
         /// <param name="args">Command line args</param>
         static async Task Main(string[] args)
         {
-            Console.Write("Enter the directory:");
+            // Read in the directory and get the masks
+            Console.Write("Enter the directory (must be an absolute path): ");
             string directory = Console.ReadLine();
             while (!Directory.Exists(directory))
             {
                 Console.WriteLine("Invalid Directory.");
-                Console.Write("Enter the directory:");
+                Console.Write("Enter the directory: ");
                 directory = Console.ReadLine();
             }
             Console.WriteLine("Enter masks: [q to continue]");
@@ -27,10 +28,15 @@ namespace ReSharperRiderTask
             {
                 masks.Add(maskInput);
             }
-            if (masks.Count == 0)
+            if (masks.Count == 0) // If there are no masks, search for everything
             {
                 masks.Add("*");
             }
+
+            Console.Write("Enter an output file path ex: \"/Users/me/Desktop/output.txt\": ");
+            string outputFile = Console.ReadLine();
+
+            // Retrieve all the files and add an analysis task
             HashSet<string> files = GetFilesInDirectoryRecursive(directory, masks);
             List<Task<DSVFile>> tasks = new List<Task<DSVFile>>(); // Use tasks to take advantage of thread pooling
             foreach (string file in files)
@@ -39,9 +45,10 @@ namespace ReSharperRiderTask
                 tasks.Add(Task.Factory.StartNew<DSVFile>(() => GetData(fileCopy)));
             }
 
+            // When results are finished, run the statistics analysis
             DSVFile[] results = await Task.WhenAll(tasks);
-            Dictionary<DSVStructure, int> structures = new Dictionary<DSVStructure, int>();
-            Dictionary<DSVFormat, int> formats = new Dictionary<DSVFormat, int>();
+            Dictionary<DSVFile.DSVStructure, int> structures = new Dictionary<DSVFile.DSVStructure, int>();
+            Dictionary<DSVFile.DSVFormat, int> formats = new Dictionary<DSVFile.DSVFormat, int>();
             foreach (DSVFile res in results)
             {
                 if (structures.ContainsKey(res.Structure))
@@ -55,17 +62,22 @@ namespace ReSharperRiderTask
                     formats.Add(res.Format, 1);
             }
 
-            Console.WriteLine("STRUCTURE STATS:");
-            foreach (DSVStructure strct in structures.Keys)
+            // Output
+            List<string> output = new List<string>();
+            output.Add("STRUCTURE STATS:");
+            foreach (DSVFile.DSVStructure strct in structures.Keys)
             {
-                Console.WriteLine("Count: {0} => {1}", structures[strct], strct.ToString());
+                output.Add(String.Format("Count: {0} => {1}", structures[strct], strct.ToString()));
             }
 
-            Console.WriteLine("FORMATS:");
-            foreach (DSVFormat fmt in formats.Keys)
+            output.Add("FORMATS:");
+            foreach (DSVFile.DSVFormat fmt in formats.Keys)
             {
-                Console.WriteLine("Count: {0} => {1}", formats[fmt], fmt.ToString());
+                output.Add(String.Format("Count: {0} => {1}", formats[fmt], fmt.ToString()));
             }
+
+            await File.WriteAllLinesAsync(outputFile, output);
+            Console.WriteLine("Finished writing file to " + outputFile);
         }
 
         /// <summary>
